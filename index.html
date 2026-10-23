@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#09090b">
+  <title>Link Stocker — All Your Links in One Place</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #09090b;
+      color: #f8fafc;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 7%;
+      border-bottom: 1px solid #27272a;
+    }
+    .logo { font-size: 23px; font-weight: 800; }
+    .logo span { color: #a3e635; }
+    a { color: inherit; text-decoration: none; }
+    .nav { display: flex; gap: 18px; align-items: center; }
+    .btn {
+      display: inline-block;
+      background: #a3e635;
+      color: #111;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    .hero {
+      text-align: center;
+      padding: 85px 20px 65px;
+      max-width: 850px;
+      margin: auto;
+    }
+    .tag {
+      display: inline-block;
+      color: #bef264;
+      border: 1px solid #3f6212;
+      border-radius: 30px;
+      padding: 9px 14px;
+      font-size: 13px;
+    }
+    h1 {
+      font-size: clamp(40px, 8vw, 72px);
+      line-height: 1.08;
+      letter-spacing: -2px;
+      margin: 25px 0;
+    }
+    h1 span { color: #a3e635; }
+    .hero p {
+      color: #a1a1aa;
+      font-size: 17px;
+      line-height: 1.8;
+      max-width: 580px;
+      margin: 0 auto 28px;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      padding: 20px 7% 70px;
+    }
+    .card {
+      background: #141417;
+      border: 1px solid #29292e;
+      border-radius: 18px;
+      padding: 25px;
+    }
+    .card .icon { font-size: 30px; }
+    .card h2 { font-size: 19px; }
+    .card p { color: #a1a1aa; line-height: 1.7; font-size: 14px; }
+    .demo {
+      max-width: 380px;
+      margin: 0 auto 75px;
+      background: #141417;
+      border: 1px solid #29292e;
+      border-radius: 22px;
+      padding: 24px;
+      text-align: center;
+    }
+    .avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #a3e635;
+      color: #111;
+      display: grid;
+      place-items: center;
+      font-size: 25px;
+      font-weight: 800;
+      margin: auto;
+    }
+    .demo-link {
+      display: block;
+      border: 1px solid #3f3f46;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 12px;
+      background: #202024;
+    }
+    .demo-link:hover { border-color: #a3e635; }
+    footer {
+      border-top: 1px solid #27272a;
+      text-align: center;
+      padding: 25px;
+      color: #71717a;
+      font-size: 13px;
+    }
+    @media(max-width: 650px) {
+      header { padding: 18px 5%; }
+      .nav { gap: 10px; }
+      .nav .optional { display: none; }
+      .features { grid-template-columns: 1fr; padding: 15px 5% 50px; }
+      .hero { padding-top: 65px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="logo" href="#">LINK <span>STOCKER.</span></a>
+    <nav class="nav">
+      <a class="optional" href="#features">Features</a>
+      <a class="btn" href="#demo">Explore Demo</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <span class="tag">✦ ONE LINK. ENDLESS POSSIBILITIES.</span>
+      <h1>All your links.<br><span>One destination.</span></h1>
+      <p>
+        Bring your music, social profiles and creative work together.
+        One simple link to share everything that matters to you.
+      </p>
+      <a class="btn" href="#demo">Discover Link Stocker ↗</a>
+    </section>
+
+    <section class="features" id="features">
+      <article class="card">
+        <div class="icon">🎵</div>
+        <h2>Music Smart Links</h2>
+        <p>Bring your Spotify, Apple Music and YouTube Music links together on one page.</p>
+      </article>
+      <article class="card">
+        <div class="icon">🔗</div>
+        <h2>Social Bio Pages</h2>
+        <p>Share your Instagram, YouTube and all your important links in one place.</p>
+      </article>
+      <article class="card">
+        <div class="icon">📊</div>
+        <h2>Link Analytics</h2>
+        <p>Build toward tracking page views and link clicks from your future dashboard.</p>
+      </article>
+    </section>
+
+    <section class="demo" id="demo">
+      <div class="avatar">LS</div>
+      <h2>Your links, your identity.</h2>
+      <p style="color:#a1a1aa">A preview of a Link Stocker profile</p>
+      <a class="demo-link" href="https://open.spotify.com/">🎵 Spotify</a>
+      <a class="demo-link" href="https://music.youtube.com/">▶ YouTube Music</a>
+      <a class="demo-link" href="https://music.apple.com/">🎧 Apple Music</a>
+      <a class="demo-link" href="https://www.instagram.com/">◎ Instagram</a>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Link Stocker · Your links, your world.
+  </footer>
+</body>
+  </html>
+  
