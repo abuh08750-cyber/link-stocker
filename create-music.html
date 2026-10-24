@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Smart Link - Link Stocker</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #101010;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    main {
+      max-width: 520px;
+      margin: 25px auto;
+      padding: 22px;
+      background: #1c1c1c;
+      border-radius: 16px;
+    }
+    h1 { font-size: 27px; }
+    p { color: #bbb; line-height: 1.5; }
+    label { display: block; margin: 16px 0 7px; }
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      background: #111;
+      color: white;
+      font-size: 16px;
+    }
+    button {
+      padding: 12px 15px;
+      margin-top: 14px;
+      border: 0;
+      border-radius: 8px;
+      background: #d7ff45;
+      color: #111;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .link-row {
+      border: 1px solid #383838;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+    .remove { background: #444; color: white; }
+    #message { overflow-wrap: anywhere; }
+    a { color: #d7ff45; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Create Music Smart Link</h1>
+  <p>Add links from any music platform, website or app.</p>
+
+  <form id="smartForm">
+    <label for="pageTitle">Song / Page Title</label>
+    <input id="pageTitle" required placeholder="e.g. NANCHAKU">
+
+    <label for="artist">Artist Name</label>
+    <input id="artist" required placeholder="e.g. TIGER SOUL">
+
+    <h3>Your links</h3>
+    <div id="links"></div>
+    <button type="button" id="addLink">+ Add Another Link</button>
+    <br>
+    <button type="submit" id="saveButton">Create Smart Link</button>
+  </form>
+
+  <p id="message" role="status"></p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Use the same Project URL and publishable key as signup.html.
+  const SUPABASE_URL = 'https://hbgklajeoqnfectwyfok.supabase.co';
+  const SUPABASE_KEY = "sb_publishable_VQdQzY5E-IrmXpl9BVOKaw_75qMF7J5";
+
+  const client = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const linksBox = document.getElementById("links");
+  const message = document.getElementById("message");
+  const form = document.getElementById("smartForm");
+  const saveButton = document.getElementById("saveButton");
+
+  function addLinkRow(title = "", url = "") {
+    const row = document.createElement("div");
+    row.className = "link-row";
+
+    const titleLabel = document.createElement("label");
+    titleLabel.textContent = "Link Name";
+    const titleInput = document.createElement("input");
+    titleInput.className = "link-title";
+    titleInput.placeholder = "e.g. Spotify";
+    titleInput.value = title;
+    titleInput.required = true;
+
+    const urlLabel = document.createElement("label");
+    urlLabel.textContent = "Website / App URL";
+    const urlInput = document.createElement("input");
+    urlInput.className = "link-url";
+    urlInput.type = "url";
+    urlInput.placeholder = "https://example.com/your-link";
+    urlInput.value = url;
+    urlInput.required = true;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "remove";
+    removeButton.textContent = "Remove Link";
+    removeButton.onclick = () => {
+      if (linksBox.children.length > 1) row.remove();
+      else message.textContent = "At least one link is required.";
+    };
+
+    row.append(titleLabel, titleInput, urlLabel, urlInput, removeButton);
+    linksBox.appendChild(row);
+  }
+
+  document.getElementById("addLink").onclick = () => addLinkRow();
+  addLinkRow();
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    message.textContent = "";
+    saveButton.disabled = true;
+
+    try {
+      const { data: authData, error: authError } =
+        await client.auth.getUser();
+
+      if (authError || !authData.user) {
+        throw new Error("Please log in first, then open this page again.");
+      }
+
+      const user = authData.user;
+      const pageTitle = document.getElementById("pageTitle").value.trim();
+      const artist = document.getElementById("artist").value.trim();
+
+      const links = [...linksBox.querySelectorAll(".link-row")].map(row => ({
+        title: row.querySelector(".link-title").value.trim(),
+        url: row.querySelector(".link-url").value.trim()
+      }));
+
+      if (!links.length || links.some(link => !link.title || !link.url)) {
+        throw new Error("Har link ka naam aur URL bharo.");
+      }
+
+      for (const link of links) {
+        const parsed = new URL(link.url);
+        if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+          throw new Error("Har link ka URL http:// ya https:// se shuru hona chahiye.");
+        }
+      }
+
+      const username =
+        "user-" + user.id.replace(/-/g, "").slice(0, 20);
+
+      const { error: profileError } = await client
+        .from("profiles")
+        .upsert({
+          id: user.id,
+          username,
+          display_name: artist
+        }, { onConflict: "id" });
+
+      if (profileError) throw profileError;
+
+      const slugBase = pageTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 35) || "music";
+
+      const slug = slugBase + "-" + crypto.randomUUID().slice(0, 8);
+
+      const { data: page, error: pageError } = await client
+        .from("pages")
+        .insert({
+          user_id: user.id,
+          title: pageTitle,
+          slug,
+          page_type: "music",
+          is_public: true
+        })
+        .select()
+        .single();
+
+      if (pageError) throw pageError;
+
+      const { error: linksError } = await client
+        .from("links")
+        .insert(links.map((link, index) => ({
+          page_id: page.id,
+          title: link.title,
+          url: link.url,
+          platform: "website",
+          sort_order: index
+        })));
+
+      if (linksError) {
+        await client.from("pages").delete().eq("id", page.id);
+        throw linksError;
+      }
+
+      message.textContent =
+        "Smart link data saved! Page slug: " + slug +
+        ". Public page viewer abhi banana baaki hai.";
+      form.reset();
+      linksBox.replaceChildren();
+      addLinkRow();
+
+    } catch (error) {
+      message.textContent = "Error: " + (error.message || "Something went wrong.");
+    } finally {
+      saveButton.disabled = false;
+    }
+  });
+</script>
+</body>
+      </html>
+        
