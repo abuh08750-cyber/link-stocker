@@ -152,6 +152,11 @@ form.addEventListener("submit",async(event)=>{
         contentType:file.type,upsert:false
       });
       if(uploadError)throw uploadError;
+            const {error:artworkSaveError}=await client
+        .from("pages")
+        .update({artwork_path:uploadedPath})
+        .eq("id",page.id);
+      if(artworkSaveError)throw artworkSaveError;
     }
 
     const {error:linksError}=await client.from("links").insert(links.map((item,index)=>({
