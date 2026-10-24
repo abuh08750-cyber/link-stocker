@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Link Stocker</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: #080808; color: white;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      padding: 20px; border-bottom: 1px solid #292929;
+      display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .brand { font-size: 21px; font-weight: bold; }
+    .green { color: #a3e635; }
+    button {
+      padding: 11px 15px; border-radius: 9px;
+      border: 1px solid #444; background: #222;
+      color: white; font-weight: bold; cursor: pointer;
+    }
+    main { max-width: 1000px; margin: auto; padding: 24px 16px; }
+    .welcome { color: #aaa; overflow-wrap: anywhere; }
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+      gap: 16px; margin-top: 28px;
+    }
+    .card {
+      background: #141414; border: 1px solid #292929;
+      padding: 22px; border-radius: 16px;
+    }
+    .card h2 { font-size: 19px; }
+    .card p { color: #aaa; line-height: 1.5; }
+    .action {
+      display: inline-block; margin-top: 10px;
+      background: #a3e635; color: #111; text-decoration: none;
+      padding: 12px 15px; border-radius: 9px; font-weight: bold;
+    }
+    #status { color: #a3e635; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="green">LINK</span> STOCKER</div>
+    <button id="logout">Log Out</button>
+  </header>
+
+  <main>
+    <h1>Your Dashboard</h1>
+    <p class="welcome">Logged in as: <span id="user-email">Checking...</span></p>
+    <p id="status" role="status"></p>
+
+    <div class="grid">
+      <section class="card">
+        <h2>🎵 Music Smart Links</h2>
+        <p>Bring your music streaming links together on one page.</p>
+        <button type="button" disabled>Create Music Link — Coming Soon</button>
+      </section>
+
+      <section class="card">
+        <h2>🔗 Social Bio Pages</h2>
+        <p>Plan a page for your social media and other important links.</p>
+        <button type="button" disabled>Create Bio Page — Coming Soon</button>
+      </section>
+
+      <section class="card">
+        <h2>📊 Link Analytics</h2>
+        <p>Analytics will show link clicks after tracking is implemented.</p>
+        <button type="button" disabled>View Analytics — Coming Soon</button>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://hbgklajeoqnfectwyfok.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_VQdQzY5E-IrmXpl9BVOKaw_75qMF7J5";
+
+    const client = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+    async function checkLogin() {
+      const { data, error } = await client.auth.getUser();
+
+      if (error || !data.user) {
+        window.location.href = "/signup.html";
+        return;
+      }
+
+      document.getElementById("user-email").textContent =
+        data.user.email || "Signed-in user";
+    }
+
+    document.getElementById("logout").addEventListener("click", async () => {
+      const { error } = await client.auth.signOut();
+
+      if (error) {
+        document.getElementById("status").textContent = error.message;
+        return;
+      }
+
+      window.location.href = "/signup.html";
+    });
+
+    checkLogin();
+  </script>
+</body>
+        </html>
+          
