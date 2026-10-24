@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up / Login — Link Stocker</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center;
+      padding: 20px; background: #080808; color: white;
+      font-family: Arial, sans-serif;
+    }
+    .card {
+      width: 100%; max-width: 420px; padding: 28px;
+      background: #141414; border: 1px solid #292929;
+      border-radius: 18px;
+    }
+    h1 { text-align: center; font-size: 28px; }
+    .green { color: #a3e635; }
+    p { text-align: center; color: #aaa; }
+    label { display: block; margin-top: 18px; }
+    input {
+      width: 100%; padding: 14px; margin-top: 8px;
+      background: #202024; border: 1px solid #444;
+      border-radius: 9px; color: white; font-size: 16px;
+    }
+    button {
+      width: 100%; padding: 14px; margin-top: 16px;
+      border: 0; border-radius: 9px; font-weight: bold;
+      font-size: 16px; cursor: pointer;
+    }
+    #signup { background: #a3e635; color: #111; }
+    #login { background: #292929; color: white; border: 1px solid #444; }
+    #message { overflow-wrap: anywhere; font-size: 14px; }
+    a { color: #a3e635; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1><span class="green">LINK</span> STOCKER</h1>
+    <p>Create your account or log in</p>
+
+    <form id="auth-form">
+      <label for="email">Email address</label>
+      <input id="email" type="email" placeholder="Enter your email" required>
+
+      <label for="password">Password</label>
+      <input id="password" type="password"
+        placeholder="At least 6 characters" minlength="6" required>
+
+      <button id="signup" type="button">Create Account</button>
+      <button id="login" type="button">Log In</button>
+    </form>
+
+    <p id="message" role="status"></p>
+    <p><a href="/">Back to home</a></p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://hbgklajeoqnfectwyfok.supabase.co/rest/v1/";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_VQdQzY5E-IrmXpl9BVOKaw_75qMF7J5";
+
+    const client = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+    const message = document.getElementById("message");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    document.getElementById("signup").addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || password.length < 6) {
+        message.textContent = "Enter a valid email and password of at least 6 characters.";
+        return;
+      }
+
+      message.textContent = "Creating account...";
+
+      const { data, error } = await client.auth.signUp({ email, password });
+
+      if (error) {
+        message.textContent = error.message;
+      } else if (data.session) {
+        message.textContent = "Account created! You are logged in.";
+      } else {
+        message.textContent = "Check your email to confirm your account.";
+      }
+    });
+
+    document.getElementById("login").addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        message.textContent = "Enter your email and password.";
+        return;
+      }
+
+      message.textContent = "Logging in...";
+
+      const { error } = await client.auth.signInWithPassword({ email, password });
+
+      message.textContent = error ? error.message : "Login successful!";
+    });
+  </script>
+</body>
+</html>
