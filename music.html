@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101010">
+  <title>Music Smart Link | Link Stocker</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px 16px;
+      background: #101010;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    main { max-width: 520px; margin: 0 auto; text-align: center; }
+    .brand { color: #d7ff45; font-weight: bold; letter-spacing: 2px; }
+    .cover {
+      width: 170px;
+      height: 170px;
+      margin: 25px auto;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #35204c, #111, #53341d);
+      display: grid;
+      place-items: center;
+      font-size: 44px;
+      font-weight: bold;
+      box-shadow: 0 12px 35px #0009;
+      overflow-wrap: anywhere;
+    }
+    h1 { font-size: 30px; margin-bottom: 8px; overflow-wrap: anywhere; }
+    #artist { color: #bbb; margin-bottom: 28px; }
+    #links { display: grid; gap: 12px; }
+    .music-link {
+      display: block;
+      padding: 16px;
+      border-radius: 10px;
+      background: #d7ff45;
+      color: #111;
+      text-decoration: none;
+      font-weight: bold;
+      overflow-wrap: anywhere;
+    }
+    .music-link:focus { outline: 3px solid white; }
+    #status { color: #bbb; line-height: 1.6; }
+    footer { margin-top: 35px; color: #888; font-size: 13px; }
+    footer a { color: #d7ff45; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand">LINK STOCKER</div>
+  <div class="cover" id="cover">♪</div>
+  <h1 id="title">Loading...</h1>
+  <p id="artist"></p>
+  <p id="status">Loading music links...</p>
+  <div id="links"></div>
+  <footer>
+    Powered by <a href="https://link-stocker.vercel.app/">Link Stocker</a>
+  </footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // signup.html aur create-music.html wali same values use karo.
+  const SUPABASE_URL = 'https://hbgklajeoqnfectwyfok.supabase.co';
+  const SUPABASE_KEY = "sb_publishable_VQdQzY5E-IrmXpl9BVOKaw_75qMF7J5";
+
+  const client = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  async function loadMusicPage() {
+    const status = document.getElementById("status");
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get("slug");
+
+    if (!slug) {
+      document.getElementById("title").textContent = "Music Smart Link";
+      status.textContent =
+        "A song page slug is required. Open the unique link for your song.";
+      return;
+    }
+
+    try {
+      const { data: page, error: pageError } = await client
+        .from("pages")
+        .select("id, title, user_id")
+        .eq("slug", slug)
+        .eq("page_type", "music")
+        .eq("is_public", true)
+        .maybeSingle();
+
+      if (pageError) throw pageError;
+      if (!page) {
+        throw new Error("Page nahi mila. Slug check karo ya page dobara create karo.");
+      }
+
+      const { data: profile, error: profileError } = await client
+        .from("profiles")
+        .select("display_name")
+        .eq("id", page.user_id)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      const { data: savedLinks, error: linksError } = await client
+        .from("links")
+        .select("title, url, sort_order")
+        .eq("page_id", page.id)
+        .order("sort_order", { ascending: true });
+
+      if (linksError) throw linksError;
+
+      document.title = page.title + " | Link Stocker";
+      document.getElementById("title").textContent = page.title;
+      document.getElementById("artist").textContent =
+        profile?.display_name || "";
+      document.getElementById("cover").textContent =
+        page.title.slice(0, 2).toUpperCase();
+
+      const linksBox = document.getElementById("links");
+      linksBox.replaceChildren();
+
+      if (!savedLinks || savedLinks.length === 0) {
+        status.textContent = "Abhi is page par koi link add nahi hua.";
+        return;
+      }
+
+      for (const item of savedLinks) {
+        let parsedUrl;
+        try {
+          parsedUrl = new URL(item.url);
+        } catch {
+          continue;
+        }
+
+        if (!["https:", "http:"].includes(parsedUrl.protocol)) continue;
+
+        const link = document.createElement("a");
+        link.className = "music-link";
+        link.textContent = "Listen / Open " + item.title;
+        link.href = parsedUrl.href;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        linksBox.appendChild(link);
+      }
+
+      status.textContent = "Choose a platform or link below.";
+
+      if (!linksBox.children.length) {
+        status.textContent = "Is page par koi valid website link nahi mila.";
+      }
+    } catch (error) {
+      status.textContent = error.message || "Page load nahi ho saka.";
+    }
+  }
+
+  loadMusicPage();
+</script>
+</body>
+  </html>
+  
